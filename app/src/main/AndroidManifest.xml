@@ -2,9 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.imeswitcher">
 
-    <!-- 悬浮窗权限 -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <!-- 前台服务 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
@@ -25,15 +23,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- 透明跳板 Activity，用于从服务中弹出输入法选择器 -->
-        <activity
-            android:name=".PickerProxyActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Transparent"
-            android:taskAffinity=""
-            android:excludeFromRecents="true"
-            android:launchMode="singleInstance"/>
 
         <service
             android:name=".FloatingBallService"
