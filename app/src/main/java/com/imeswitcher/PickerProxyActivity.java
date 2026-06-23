@@ -1,64 +1,34 @@
 package com.imeswitcher;
 
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
-import java.util.List;
 
 /**
  * 透明跳板 Activity：
- * 从后台服务无法直接弹出输入法选择器（Android 9+ 限制），
- * 通过启动此透明 Activity 来获取焦点窗口，再弹选择器。
+ * Android 9+ 禁止从后台 Service 直接弹出输入法选择器，
+ * 启动此无感知透明 Activity 获取焦点窗口后再弹选择器。
+ *
+ * 注意：不能在 onCreate 里紧跟 finish()，否则窗口销毁太快，
+ * 选择器弹出前已失去焦点。改为 onStop() 时再关闭。
  */
 public class PickerProxyActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        showPicker();
-    }
-
-    private void showPicker() {
         InputMethodManager imm =
             (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-
-        List<InputMethodInfo> imes = imm.getEnabledInputMethodList();
-
-        if (imes == null || imes.size() <= 1) {
-            // 只有一个输入法，直接打开输入法设置
-            startActivity(new Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS));
-            finish();
-            return;
+        if (imm != null) {
+            imm.showInputMethodPicker();
         }
+        // 不在这里 finish()，等选择器弹出、Activity 退到后台后再关
+    }
 
-        // 构建选择列表
-        String[] names = new String[imes.size()];
-        for (int i = 0; i < imes.size(); i++) {
-            names[i] = imes.get(i).loadLabel(getPackageManager()).toString();
-        }
-
-        new android.app.AlertDialog.Builder(this)
-            .setTitle("切换输入法")
-            .setItems(names, (dialog, which) -> {
-                String imeId = imes.get(which).getId();
-                // 切换输入法（需 WRITE_SECURE_SETTINGS 权限）
-                // 若无此权限，退回到系统选择器
-                try {
-                    android.provider.Settings.Secure.putString(
-                        getContentResolver(),
-                        android.provider.Settings.Secure.DEFAULT_INPUT_METHOD,
-                        imeId
-                    );
-                } catch (SecurityException e) {
-                    // 无 WRITE_SECURE_SETTINGS 权限时，用系统选择器兜底
-                    imm.showInputMethodPicker();
-                }
-                finish();
-            })
-            .setOnDismissListener(d -> finish())
-            .show();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // 用户选择完毕或按返回键后，Activity 进入 Stop 状态，此时关闭
+        finish();
     }
 }
