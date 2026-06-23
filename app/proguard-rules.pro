@@ -1,0 +1,2 @@
+-keep class com.imeswitcher.** { *; }
+-keepattributes *Annotation*
