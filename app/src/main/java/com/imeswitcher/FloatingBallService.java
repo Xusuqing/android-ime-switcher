@@ -94,10 +94,13 @@ public class FloatingBallService extends Service {
                     return true;
 
                 case MotionEvent.ACTION_UP:
-                    long duration = System.currentTimeMillis() - touchDownTime;
-                    // 短按（< 200ms 且没有拖动）视为点击
-                    if (!isDragging && duration < 200) {
-                        ImeUtils.showImePicker(this);
+                    // 没有拖动就视为点击（不限时长，避免遗漏）
+                    if (!isDragging) {
+                        // 通过透明 Activity 跳板弹出选择器
+                        // 直接从 Service 调用 showInputMethodPicker 在 Android 9+ 会被系统静默忽略
+                        Intent pickerIntent = new Intent(FloatingBallService.this, PickerProxyActivity.class);
+                        pickerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(pickerIntent);
                     }
                     return true;
             }

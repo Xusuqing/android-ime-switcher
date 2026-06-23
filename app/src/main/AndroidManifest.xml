@@ -26,6 +26,15 @@
             </intent-filter>
         </activity>
 
+        <!-- 透明跳板 Activity，用于从服务中弹出输入法选择器 -->
+        <activity
+            android:name=".PickerProxyActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Transparent"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"/>
+
         <service
             android:name=".FloatingBallService"
             android:exported="false"
